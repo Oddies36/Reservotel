@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
+import { fetchCsrfToken } from '../API/api';
 
 const validationSchema = Yup.object({
     nom: Yup.string().required('Le nom est requis'),
@@ -34,7 +35,7 @@ const validationSchema = Yup.object({
     pays: Yup.string().required('Le pays est requis')
 });
 
-export default function Login() {
+export default function CreateNewUser() {
     const navigate = useNavigate();
 
 
@@ -80,6 +81,7 @@ export default function Login() {
             };
 
             try {
+                await fetchCsrfToken();
                 const response = await apiClient.post('/register', addrClientDTO);
 
                 if (response.data === 'ok') {
@@ -110,9 +112,9 @@ export default function Login() {
             <Box component="form" noValidate onSubmit={formik.handleSubmit} sx={{ mt: 1, width: '100%' }}>
 
                 <Grid container spacing={2}>
-                    <Grid item xs={6} border={1}>
-                        <Grid container direction="column" border={1}>
-                            <Grid item border={1}>
+                    <Grid item xs={6}>
+                        <Grid container direction="column">
+                            <Grid item>
                                 <TextField
                                     margin="dense"
                                     required
@@ -359,7 +361,7 @@ export default function Login() {
                 </Button>
                 <Grid container>
                     <Grid item xs>
-                        <DomLink to="/login">
+                        <DomLink to="/auth/login">
                             Retour à la connexion
                         </DomLink>
                     </Grid>

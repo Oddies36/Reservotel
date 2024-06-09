@@ -2,51 +2,40 @@ package be.reservotel.reservotel.Model;
 
 import java.util.Set;
 
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
 
 @Entity
 public class OptionHotel {
     
-    @EmbeddedId
-    private OptionHotelId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id_option_hotel;
     private double prixOption;
 
     @ManyToOne
-    @MapsId("idHotel")
     @JoinColumn(name = "id_Hotel")
     private Hotel hotel;
 
     @ManyToOne
-    @MapsId("idOption")
     @JoinColumn(name = "id_Option")
     private Option option;
 
-    @ManyToMany
-    @JoinTable(
-        name = "DetailsReservation_OptionHotel",
-        joinColumns = {
-            @JoinColumn(name = "id_Option", referencedColumnName = "id_Option"),
-            @JoinColumn(name = "id_Hotel", referencedColumnName = "id_Hotel")
-        },
-        inverseJoinColumns = {
-            @JoinColumn(name = "idDetailsReservation")
-        }
-    )
+    @ManyToMany(mappedBy = "optionHotels")
     private Set<DetailsReservation> detailsReservations;
 
 
-    public OptionHotelId getId() {
-        return id;
+    public Long getid_option_hotel() {
+        return id_option_hotel;
     }
 
-    public void setId(OptionHotelId id) {
-        this.id = id;
+    public void setid_option_hotel(Long id_option_hotel) {
+        this.id_option_hotel = id_option_hotel;
     }
 
     public double getPrixOption() {
@@ -57,8 +46,8 @@ public class OptionHotel {
         this.prixOption = prixOption;
     }
 
-    public OptionHotel(OptionHotelId id, double prixOption) {
-        this.id = id;
+    public OptionHotel(Long id_option_hotel, double prixOption) {
+        this.id_option_hotel = id_option_hotel;
         this.prixOption = prixOption;
     }
 

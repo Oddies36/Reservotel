@@ -13,6 +13,16 @@ public class ClientDTO {
     private int pointsFidelite;
     private String role;
 
+    public ClientDTO(String nom, String email, String prenom, int pointsFidelite, LocalDate dateNaissance, String numeroTelephone, String role) {
+        this.nom = nom;
+        this.email = email;
+        this.prenom = prenom;
+        this.pointsFidelite = pointsFidelite;
+        this.dateNaissance = dateNaissance;
+        this.numeroTelephone = numeroTelephone;
+        this.role = role;
+    }
+
     public String getPassword() {
         return password;
     }

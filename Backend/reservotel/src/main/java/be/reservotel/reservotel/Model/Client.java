@@ -12,7 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
-public class Client {
+public class Client{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -152,4 +152,5 @@ public class Client {
         this.adresse = adresse;
         this.role = role;
     }
+
 }

@@ -81,6 +81,14 @@ public class Chambre {
         this.prixBase = prixBase;
     }
 
+    public Hotel getHotel() {
+        return hotel;
+    }
+
+    public void setHotel(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
     //Constructeur par défaut, nécessaire pour JPA
     public Chambre() {
     }

@@ -6,14 +6,16 @@ import Grid from '@mui/material/Grid';
 import { apiClient } from '../API/api';
 import LoginLayout from './LoginLayout';
 import { Link as DomLink} from 'react-router-dom';
+import { fetchCsrfToken } from '../API/api';
 
-export default function ForgotPassword({ BackToLoginClick }) {
+export default function ForgotPassword() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const email = data.get('email');
 
     try{
+      await fetchCsrfToken();
       const response = await apiClient.post('/login', {email});
       
       if (response.data === 'ok'){
@@ -56,7 +58,7 @@ export default function ForgotPassword({ BackToLoginClick }) {
         </Button>
         <Grid container>
           <Grid item xs>
-            <DomLink to="/login">
+            <DomLink to="/auth/login">
               Retour à la connexion
             </DomLink>
           </Grid>

@@ -8,7 +8,7 @@ import logo1 from '../Images/homeimage1.jpg';
 import logo2 from '../Images/homeimage2.jpg';
 import logo3 from '../Images/homeimage3.jpg';
 import { apiClient } from '../API/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs';
@@ -20,15 +20,20 @@ const validationSchema = Yup.object({
     .max(10, 'Le nombre de personnes ne peut pas dépasser 10')
     .positive('Le nombre de personnes doit être positif')
     .integer('Mauvais format'),
+  budget: Yup.number().integer('Mauvais format').positive('Le budget doit être positif')
 });
 
 export default function MainContent() {
   const dateToday = dayjs();
-
+  const location = useLocation();
   const navigate = useNavigate();
-
   const [hotelCountries, setCountries] = useState([]);
   const [hotelCities, setCities] = useState([]);
+
+  //Remet le scroll en haut de la page
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   const images = [logo1, logo2, logo3];
 

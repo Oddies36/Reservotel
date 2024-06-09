@@ -4,26 +4,23 @@ import { Checkbox, Dialog, Rating, Container, Card, CardContent, CardMedia, Typo
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { apiClient } from '../API/api';
 import Swal from 'sweetalert2';
-
-
-
-
+import { fetchCsrfToken } from '../API/api';
 
 export default function HotelSelectContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
 
-  //Récupère l'id de l'hotel dans l'url
   const { idHotel } = useParams();
   const nombrePersonnesURL = searchParams.get('nombrePersonnes');
+  const dateArriveURL = searchParams.get('dateArrive');
+  const dateDepartURL = searchParams.get('dateDepart');
 
-  //l'hotel selectionné
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  //Collection de chambres
   const [chambres, setChambres] = useState([]);
+  const [nombreChambresDispo, setNombreChambresDispo] = useState([]);
 
   const [selectedChambreType, setSelectedChambreType] = useState('');
   const [selectedChambrePrix, setSelectedChambrePrix] = useState(0);
@@ -31,16 +28,45 @@ export default function HotelSelectContent() {
   const [pannier, setPannier] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  //Ouvre le dialog pour les options
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  //Contient la liste des options choisies dans le dialog
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [selectedOptionsName, setSelectedOptionsName] = useState([]);
 
   const [prixTotalOptions, setPrixTotalOptions] = useState(0);
+  const [prixTotal, setPrixTotal] = useState(0);
 
-  //const [prixTotal, setPrixTotal] = useState(0);
+  const [userDetails, setUserDetails] = useState({
+    nom: '',
+    prenom: '',
+    email: '',
+    dateNaissance: '',
+    numeroTelephone: '',
+    pointsFidelite: 0,
+    role: ''
+  });
+
+  const [choixPointFidelite, setChoixPointFidelite] = useState(false);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const response = await apiClient.get('/auth/getuser');
+        setUserDetails({
+          nom: response.data.nom,
+          prenom: response.data.prenom,
+          email: response.data.email,
+          dateNaissance: response.data.dateNaissance,
+          numeroTelephone: response.data.numeroTelephone,
+          pointsFidelite: response.data.pointsFidelite,
+          role: response.data.role
+        });
+      } catch (error) {
+        console.error('Error during user request:', error);
+      }
+    };
+    getCurrentUser();
+  }, []);
 
   useEffect(() => {
     const fetchHotelDetails = async () => {
@@ -56,12 +82,25 @@ export default function HotelSelectContent() {
     fetchHotelDetails();
   }, [idHotel]);
 
-
   useEffect(() => {
     const fetchChambres = async () => {
       try {
-        const response = await apiClient.get(`/chambre/${idHotel}`);
-        setChambres(response.data);
+        const response1 = await apiClient.get(`/chambre/${idHotel}/dispo`);
+        const response2 = await apiClient.get(`/chambre/${idHotel}/total`);
+
+        const availableChambres = response1.data;
+        const allChambres = response2.data;
+
+        const nombreChambres = allChambres.map(chambre => {
+          const availableChambre = availableChambres.find(ac => ac.nombrePersonnes === chambre.nombrePersonnes);
+          return {
+            ...chambre,
+            compte: availableChambre ? availableChambre.compte : 0
+          };
+        });
+
+        setNombreChambresDispo(nombreChambres);
+        setChambres(allChambres);
       } catch (error) {
         console.error('Error during chambres request:', error);
       } finally {
@@ -70,6 +109,14 @@ export default function HotelSelectContent() {
     };
     fetchChambres();
   }, [idHotel]);
+
+  useEffect(() => {
+    const calculateTotalPrice = () => {
+      const total = pannier.reduce((acc, item) => acc + item.prixTotal, 0);
+      setPrixTotal(total);
+    };
+    calculateTotalPrice();
+  }, [pannier]);
 
   const toggleDrawer = (open) => (event) => {
     if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -82,34 +129,24 @@ export default function HotelSelectContent() {
     setDialogOpen(true);
   };
 
-  const updateSelectedOptions = (idOption) => {
-    //prend prevSelectedOptions comme paramètre. La flèche signifie que c'est une fonction qui prend prevSelectedOptions comme paramètre et retourne une valeur
-    //Dans ce cas, prevSelectedOptions.includes(idOption) vérifie si idOption est déjà dans prevSelectedOptions
-    //Si c'est le cas, on le retire du tableau avec filter
-    setSelectedOptions(prevSelectedOptions => prevSelectedOptions.includes(idOption)
-      // filter(option => option !== idOption) 
-      ? prevSelectedOptions.filter(option => option !== idOption)
-      //... est un opérateur de décomposition qui permet de prendre les elements dans prevSelectedOptions et de les ajouter dans un nouveau tableau en ajoutant idOption
-      : [...prevSelectedOptions, idOption]
-    );
+  const updateSelectedOptions = (idOption, prixOption) => {
+    setSelectedOptions(prevSelectedOptions => {
+      const isOptionSelected = prevSelectedOptions.includes(idOption);
+      if (isOptionSelected) {
+        setPrixTotalOptions(prevPrixTotalOptions => prevPrixTotalOptions - prixOption);
+        return prevSelectedOptions.filter(option => option !== idOption);
+      } else {
+        setPrixTotalOptions(prevPrixTotalOptions => prevPrixTotalOptions + prixOption);
+        return [...prevSelectedOptions, idOption];
+      }
+    });
   };
-
-
 
   const updateSelectedOptionsName = (nomOption) => {
-    //prend prevSelectedOptions comme paramètre. La flèche signifie que c'est une fonction qui prend prevSelectedOptions comme paramètre et retourne une valeur
-    //Dans ce cas, prevSelectedOptions.includes(idOption) vérifie si idOption est déjà dans prevSelectedOptions
-    //Si c'est le cas, on le retire du tableau avec filter
     setSelectedOptionsName(prevSelectedOptionsName => prevSelectedOptionsName.includes(nomOption)
-      // filter(option => option !== idOption) 
       ? prevSelectedOptionsName.filter(option => option !== nomOption)
-      //... est un opérateur de décomposition qui permet de prendre les elements dans prevSelectedOptions et de les ajouter dans un nouveau tableau en ajoutant idOption
       : [...prevSelectedOptionsName, nomOption]
     );
-  };
-
-  const updatePrixTotalOption = (prixOption) => {
-    setPrixTotalOptions(prevPrixTotalOptions => prevPrixTotalOptions + prixOption);
   };
 
   const ajouterAuPannier = () => {
@@ -120,8 +157,25 @@ export default function HotelSelectContent() {
       prixBase: selectedChambrePrix,
       prixTotalOptions: prixTotalOptions,
       prixTotal: prixTotalOptions + selectedChambrePrix
-    }
+    };
+
+    const key = selectedChambreType;
+
     setPannier(prevPannier => [...prevPannier, selection]);
+
+    setNombreChambresDispo(prevNombreChambresDispo => {
+      const updatedChambres = prevNombreChambresDispo.map(chambre => {
+        if (chambre.nombrePersonnes === key) {
+          return {
+            ...chambre,
+            compte: chambre.compte - 1
+          };
+        }
+        return chambre;
+      });
+      return updatedChambres;
+    });
+
     setDialogOpen(false);
     setSelectedOptions([]);
     setSelectedOptionsName([]);
@@ -141,11 +195,40 @@ export default function HotelSelectContent() {
       });
     }
     else {
-      validerReservation();
+      utiliserPointsFidelite();
     }
   };
 
+  const utiliserPointsFidelite = () => {
+    const pointsActuels = userDetails.pointsFidelite;
+    const reductionPossible = (pointsActuels * 0.01).toFixed(2);
+
+    Swal.fire({
+      title: "Utilisez vos points!",
+      text: `Voulez vous utiliser vos points? Vous avez actuellement ${pointsActuels} points, ce qui vous donne une réduction de ${reductionPossible}€`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Oui",
+      cancelButtonText: "Non"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setChoixPointFidelite(true);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        validerReservation();
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (choixPointFidelite === true) {
+      validerReservation();
+    }
+  }, [choixPointFidelite]);
+
   const validerReservation = () => {
+    sendReservation();
     Swal.fire({
       title: "Succès",
       text: "Votre réservation a été effectuée avec succès",
@@ -153,6 +236,19 @@ export default function HotelSelectContent() {
     }).then(() => {
       navigate('/home');
     });
+  };
+
+  const sendReservation = async () => {
+    const userEmail = userDetails.email;
+    try {
+      await fetchCsrfToken();
+      const response = await apiClient.post('/reservation/create', { pannier, userEmail, dateArriveURL, dateDepartURL, idHotel, choixPointFidelite, nombrePersonnesURL });
+      const payload = { pannier, userEmail, dateArriveURL, dateDepartURL, idHotel, choixPointFidelite };
+      console.log('Payload:', JSON.stringify(payload, null, 2)); // Log the payload
+      return response;
+    } catch (error) {
+      console.error('Error during reservation request:', error);
+    }
   };
 
   if (loading) {
@@ -188,8 +284,6 @@ export default function HotelSelectContent() {
       </Container>
     );
   }
-
-
 
   return (
     <Container
@@ -263,106 +357,87 @@ export default function HotelSelectContent() {
         Chambres
       </Typography>
       <Grid container spacing={2}>
-        {chambres.map(chambre => (
-          <Grid item xs={12} sm={6} md={4} key={chambre.numeroChambre}>
+        {nombreChambresDispo.map((chambre, index) => (
+          <Grid item xs={12} sm={6} md={4} key={index}>
             <Card>
               <CardMedia
                 component="img"
-                alt={`Room ${chambre.numeroChambre}`}
+                alt={`Room for ${chambre.nombrePersonnes} people`}
                 height="200"
                 image={chambre.photo}
-                title={`Room ${chambre.numeroChambre}`}
+                title={`Room for ${chambre.nombrePersonnes} people`}
               />
               <CardContent>
-                <Typography variant="h5" component="div"  >
+                <Typography variant="h5" component="div">
                   Chambre {chambre.nombrePersonnes} personne(s)
                 </Typography>
                 <Typography variant="body1" color="text.secondary" gutterBottom>
                   Prix sans options: {chambre.prixBase}€
                 </Typography>
                 <Typography variant="body1" color="text.secondary" gutterBottom>
-                  Disponibilité: {chambre.estDisponible ? 'Oui' : 'Non'}
+                  Nombre disponible: {chambre.compte}
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <Button variant="contained" color="primary" onClick={() => { openOptions(); setSelectedChambreType(chambre.nombrePersonnes); setSelectedChambrePrix(chambre.prixBase) }}>
-                    Choisir les options
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      openOptions();
+                      setSelectedChambreType(chambre.nombrePersonnes);
+                      setSelectedChambrePrix(chambre.prixBase);
+                    }}
+                    disabled={chambre.compte === 0}
+                  >
+                    {chambre.compte === 0 ? 'Indisponible' : 'Choisir les options'}
                   </Button>
                 </Box>
               </CardContent>
             </Card>
           </Grid>
         ))}
-
-
-
-
-
-
-
-
-
-
-        <Dialog open={dialogOpen}>
-          <DialogContent>
-            <Typography variant="h5" component="div" textAlign={'center'} marginBottom={2}>
-              Options
-            </Typography>
-            <Typography>
-              Chambre {selectedChambreType} personne(s)
-            </Typography>
-
-
-
-            <Grid container>
-              {selectedHotel.options.map(option => (
-                <Grid item xs={12} sm={6} key={option.idOption}>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={selectedOptions.includes(option.idOption)}
-                          onChange={() => { updateSelectedOptions(option.idOption); updateSelectedOptionsName(option.nomOption); updatePrixTotalOption(option.prixOption); }}
-                        />
-                      }
-                      label={`${option.nomOption} - ${option.prixOption}€`}
-                    />
-                  </FormGroup>
-                </Grid>
-              ))}
-            </Grid>
-
-
-
-
-            <Grid container padding={2}>
-              <Grid item xs={6} sx={{ textAlign: 'left' }}>
-                <Button variant="contained" color="primary" onClick={ajouterAuPannier}>
-                  Ajouter à la réservation
-                </Button>
-              </Grid>
-              <Grid item xs={6} sx={{ textAlign: 'center' }}>
-                <Button variant="contained" color="primary" onClick={() => { setDialogOpen(false); setSelectedOptions([]); setSelectedOptionsName([]); }}>
-                  Annuler
-                </Button>
-              </Grid>
-            </Grid>
-
-
-
-          </DialogContent>
-        </Dialog>
       </Grid>
 
+      <Dialog open={dialogOpen}>
+        <DialogContent>
+          <Typography variant="h5" component="div" textAlign={'center'} marginBottom={2}>
+            Options
+          </Typography>
+          <Typography>
+            Chambre {selectedChambreType} personne(s)
+          </Typography>
 
+          <Grid container>
+            {selectedHotel.options.map(option => (
+              <Grid item xs={12} sm={6} key={option.idOption}>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedOptions.includes(option.idOption)}
+                        onChange={() => { updateSelectedOptions(option.idOption, option.prixOption); updateSelectedOptionsName(option.nomOption); }}
+                      />
+                    }
+                    label={`${option.nomOption} - ${option.prixOption}€`}
+                  />
+                </FormGroup>
+              </Grid>
+            ))}
+          </Grid>
 
-
-
-
-
-
-
-
-
+          <Grid container padding={2}>
+            <Grid item xs={6} sx={{ textAlign: 'left' }}>
+              <Button variant="contained" color="primary" onClick={ajouterAuPannier}>
+                Ajouter à la réservation
+              </Button>
+            </Grid>
+            <Grid item xs={6} sx={{ textAlign: 'center' }}>
+              <Button variant="contained" color="primary" onClick={() => { setDialogOpen(false); setSelectedOptions([]); setSelectedOptionsName([]); }}>
+                Annuler
+              </Button>
+            </Grid>
+          </Grid>
+        </DialogContent>
+      </Dialog>
 
       <SwipeableDrawer
         anchor="right"
@@ -401,12 +476,14 @@ export default function HotelSelectContent() {
                       <Typography component="span" variant="body2" display="block">
                         Prix total: {item.prixTotal}€
                       </Typography>
-
                     </>
                   } />
               </ListItem>
             ))}
           </List>
+          <Typography variant="h6" gutterBottom>
+            Prix total: {prixTotal}€
+          </Typography>
           <Button variant="contained" color="primary" onClick={checkNombrePersonnes}>
             Payer
           </Button>

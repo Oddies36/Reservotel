@@ -4,13 +4,11 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import be.reservotel.reservotel.DTO.HotelDTO;
 import be.reservotel.reservotel.DTO.OptionDTO;
 import be.reservotel.reservotel.Model.Equipement;
 import be.reservotel.reservotel.Model.Hotel;
-import be.reservotel.reservotel.Model.Option;
 
 public interface HotelRepository extends JpaRepository<Hotel, Long>{
     

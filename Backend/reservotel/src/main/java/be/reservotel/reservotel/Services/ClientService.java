@@ -1,9 +1,11 @@
 package be.reservotel.reservotel.Services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import be.reservotel.reservotel.DTO.AddrClientDTO;
+import be.reservotel.reservotel.DTO.ClientDTO;
 import be.reservotel.reservotel.Model.Adresse;
 import be.reservotel.reservotel.Model.Client;
 import be.reservotel.reservotel.Repository.AdresseRepository;
@@ -18,6 +20,9 @@ public class ClientService {
     @Autowired
     private AdresseRepository adresseRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public boolean writeClient(AddrClientDTO addrClient) {
 
         Adresse adresse = new Adresse();
@@ -31,7 +36,8 @@ public class ClientService {
         Adresse savedAdresse = adresseRepository.save(adresse);
 
         Client client = new Client();
-        client.setPassword(addrClient.getClient().getPassword());
+        String encodedPassword = passwordEncoder.encode(addrClient.getClient().getPassword());
+        client.setPassword(encodedPassword);
         client.setNom(addrClient.getClient().getNom());
         client.setPrenom(addrClient.getClient().getPrenom());
         client.setDateNaissance(addrClient.getClient().getDateNaissance());
@@ -59,5 +65,19 @@ public class ClientService {
         } else {
             return -1;
         }
+    }
+
+    public boolean checkMailExists(String email) {
+        int emailExists = clientRepository.getEmail(email);
+        if (emailExists > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean saveClient(ClientDTO addrClient) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'saveClient'");
     }
 }

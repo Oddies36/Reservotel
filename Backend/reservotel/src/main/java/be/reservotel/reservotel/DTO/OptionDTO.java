@@ -30,6 +30,14 @@ public class OptionDTO {
         this.prixOption = prixOption;
     }
 
+    public OptionDTO() {
+    }
+
+    public OptionDTO(Long idOption, String nomOption) {
+        this.idOption = idOption;
+        this.nomOption = nomOption;
+    }
+
     public OptionDTO(Long idOption, String nomOption, double prixOption) {
         this.idOption = idOption;
         this.nomOption = nomOption;

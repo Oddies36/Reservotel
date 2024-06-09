@@ -4,7 +4,7 @@ import java.util.List;
 
 import be.reservotel.reservotel.Model.Adresse;
 import be.reservotel.reservotel.Model.Equipement;
-import be.reservotel.reservotel.Model.Option;
+
 
 public class HotelDTO {
 
@@ -138,6 +138,9 @@ public class HotelDTO {
         this.contactTelephone = contactTelephone;
         this.contactEmail = contactEmail;
         this.adresse = adresse;
+    }
+
+    public HotelDTO() {
     }
 
     

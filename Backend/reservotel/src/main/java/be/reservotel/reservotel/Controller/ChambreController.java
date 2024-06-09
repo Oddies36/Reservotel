@@ -23,9 +23,15 @@ public class ChambreController {
     @Autowired
     private ChambreService chambreService;
     
-    @GetMapping("/{idHotel}")
+    @GetMapping("/{idHotel}/total")
     public ResponseEntity<List<ChambreDTO>> getHotelCountries(@PathVariable Long idHotel) {
         List<ChambreDTO> chambres = chambreService.getChambresByIdHotel(idHotel);
+        return ResponseEntity.ok(chambres);
+    }
+
+    @GetMapping("/{idHotel}/dispo")
+    public ResponseEntity<List<ChambreDTO>> getHotelCountriesDispo(@PathVariable Long idHotel) {
+        List<ChambreDTO> chambres = chambreService.getChambresDispoByIdHotel(idHotel);
         return ResponseEntity.ok(chambres);
     }
     

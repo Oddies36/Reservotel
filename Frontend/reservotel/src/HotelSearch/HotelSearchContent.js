@@ -51,6 +51,8 @@ export default function HotelSearchContent() {
   }, [location.search, navigate]);
 
 
+
+
   useEffect(() => {
     const fetchHotels = async () => {
       try {

@@ -6,9 +6,27 @@ import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
-import { Link as DomLink} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { apiClient } from '../API/api';
+import { fetchCsrfToken } from '../API/api';
 
 function NavBar() {
+
+  const navigate = useNavigate();
+
+  const handleNavigation = (path) => {
+    navigate(path);
+  }
+
+  const logout = async () => {
+    try {
+      await fetchCsrfToken();
+      await apiClient.post('/auth/logout');
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('Erreur de déconnexion', error);
+    }
+  };
   
   return (
     <div>
@@ -54,8 +72,7 @@ function NavBar() {
               }}
             >
               <MenuItem
-                component={DomLink}
-                to="/home"
+                onClick={() => handleNavigation('/home')}
                 sx={{ py: '6px', px: '12px' }}
               >
                 <Typography variant="button" color="text.primary">
@@ -63,8 +80,7 @@ function NavBar() {
                 </Typography>
               </MenuItem>
               <MenuItem
-                component={DomLink}
-                to="/home"
+                onClick={() => handleNavigation('/profile')}
                 sx={{ py: '6px', px: '12px' }}
               >
                 <Typography variant="button" color="text.primary">
@@ -72,8 +88,7 @@ function NavBar() {
                 </Typography>
               </MenuItem>
               <MenuItem
-                component={DomLink}
-                to="/home"
+                onClick={() => handleNavigation('/contact')}
                 sx={{ py: '6px', px: '12px' }}
               >
                 <Typography variant="button" color="text.primary">
@@ -83,8 +98,7 @@ function NavBar() {
             </Box>
             <Box sx={{ ml: 'auto' }}>
               <MenuItem
-                component={DomLink}
-                to="/login"
+                onClick={() => logout()}
                 sx={{ py: '6px', px: '12px' }}
               >
                 <Typography variant="button" color="text.primary">

@@ -21,5 +21,10 @@ public class ChambreService {
         return chambres;
     }
 
+    public List<ChambreDTO> getChambresDispoByIdHotel(Long idHotel) {
+        List<ChambreDTO> chambres = chambreRepository.getChambresDispoByIdHotel(idHotel);
+        return chambres;
+    }
+
 
 }

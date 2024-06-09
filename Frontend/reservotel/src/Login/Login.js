@@ -7,6 +7,8 @@ import { apiClient } from '../API/api';
 import LoginLayout from './LoginLayout';
 import { Link as DomLink, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { login } from '../API/api';
+import { fetchCsrfToken } from '../API/api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ export default function Login() {
     const password = data.get('password');
 
     try {
+      await fetchCsrfToken();
       const response = await apiClient.post('/auth/login', { email, password });
 
       if (response.data === 'ok') {

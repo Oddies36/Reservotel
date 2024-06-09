@@ -13,6 +13,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import backgroundImage from '../Images/hotel.jpg';
 import logo from '../Images/logo.png';
 import { apiClient } from '../API/api';
+import { fetchCsrfToken } from '../API/api';
 
 const defaultTheme = createTheme();
 
@@ -24,6 +25,7 @@ export default function NumberVerification() {
     const password = data.get('password');
 
     try{
+      await fetchCsrfToken();
       const response = await apiClient.post('/login', {email, password});
       
       if (response.data === 'ok'){

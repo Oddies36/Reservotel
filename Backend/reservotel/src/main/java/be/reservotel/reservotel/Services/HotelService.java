@@ -10,7 +10,6 @@ import be.reservotel.reservotel.DTO.HotelPaysDTO;
 import be.reservotel.reservotel.DTO.HotelVilleDTO;
 import be.reservotel.reservotel.DTO.OptionDTO;
 import be.reservotel.reservotel.Model.Equipement;
-import be.reservotel.reservotel.Model.Option;
 import be.reservotel.reservotel.Repository.HotelRepository;
 
 @Service

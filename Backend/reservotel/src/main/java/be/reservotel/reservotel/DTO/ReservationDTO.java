@@ -1,33 +1,18 @@
-package be.reservotel.reservotel.Model;
+package be.reservotel.reservotel.DTO;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-
-@Entity
-public class Reservation {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ReservationDTO {
     private Long idReservation;
     private String statutReservation;
     private LocalDate dateArrive;
     private LocalDate dateDepart;
     private double prixTotalReservation;
-
-    @ManyToOne
-    @JoinColumn(name = "idClient")
-    private Client client;
-
-    @OneToMany(mappedBy = "reservation")
-    private Set<DetailsReservation> detailsReservations;
+    private ClientDTO client;
+    private List<DetailsReservationDTO> detailsReservations;
+    private int totalReservations;
 
     public Long getIdReservation() {
         return idReservation;
@@ -67,32 +52,29 @@ public class Reservation {
 
     public void setPrixTotalReservation(double prixTotalReservation) {
         this.prixTotalReservation = prixTotalReservation;
-    }  
+    }
 
-    public Client getClient() {
+    public ClientDTO getClient() {
         return client;
     }
 
-    public void setClient(Client client) {
+    public void setClient(ClientDTO client) {
         this.client = client;
     }
 
-    public Set<DetailsReservation> getDetailsReservations() {
+    public List<DetailsReservationDTO> getDetailsReservations() {
         return detailsReservations;
     }
 
-    public void setDetailsReservations(Set<DetailsReservation> detailsReservations) {
+    public void setDetailsReservations(List<DetailsReservationDTO> detailsReservations) {
         this.detailsReservations = detailsReservations;
     }
 
-    public Reservation() {
+    public int getTotalReservations() {
+        return totalReservations;
     }
 
-    public Reservation(Long idReservation, String statutReservation, LocalDate dateArrive, LocalDate dateDepart, double prixTotalReservation) {
-        this.idReservation = idReservation;
-        this.statutReservation = statutReservation;
-        this.dateArrive = dateArrive;
-        this.dateDepart = dateDepart;
-        this.prixTotalReservation = prixTotalReservation;
+    public void setTotalReservations(int totalReservations) {
+        this.totalReservations = totalReservations;
     }
 }
